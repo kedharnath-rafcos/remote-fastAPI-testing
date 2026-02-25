@@ -691,6 +691,39 @@ Complete list of all environment variables:
 | `ALLOWED_ORIGINS` | string | **Yes** | Empty | Comma-separated CORS origins |
 | `SECRET_KEY` | string | **Yes** | None | Secret key for security |
 
+## 🐳 Docker & GitHub Container Registry (GHCR)
+
+### Build Docker image locally
+
+```bash
+docker build -t remote-fastapi-testing:latest .
+```
+
+### Run container locally
+
+```bash
+docker run --env-file .env -p 8000:8000 remote-fastapi-testing:latest
+```
+
+### Push image to GHCR automatically
+
+A GitHub Actions workflow is included at `.github/workflows/docker-publish.yml`.
+
+- Triggered on push to `main`, tags like `v1.0.0`, or manual run
+- Publishes image to `ghcr.io/<owner>/<repo>`
+
+### One-time GitHub setup
+
+1. Go to repository **Settings → Actions → General**.
+2. Ensure workflow permissions allow **Read and write permissions**.
+3. Push your code to `main`.
+
+After workflow success, pull the image using:
+
+```bash
+docker pull ghcr.io/<owner>/<repo>:main
+```
+
 ## 📖 Additional Resources
 
 ### Documentation

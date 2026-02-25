@@ -2,6 +2,7 @@
 Async database configuration and session management using SQLAlchemy 2.0.
 Provides async SQLAlchemy engine, session, and base model.
 """
+import ssl
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
@@ -17,10 +18,12 @@ class Base(DeclarativeBase):
 
 # Convert postgresql:// to postgresql+asyncpg://
 DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+ssl_context = ssl.create_default_context()
 
 # Create async SQLAlchemy engine
 engine = create_async_engine(
     DATABASE_URL,
+    connect_args={"ssl": ssl_context},
     echo=settings.DATABASE_ECHO,
     pool_size=settings.DATABASE_POOL_SIZE,
     max_overflow=settings.DATABASE_MAX_OVERFLOW,

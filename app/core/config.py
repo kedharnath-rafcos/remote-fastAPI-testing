@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     DATABASE_MAX_OVERFLOW: int = 10
     DATABASE_POOL_PRE_PING: bool = True
     DATABASE_POOL_RECYCLE: int = 3600
+    DB_INIT_ON_STARTUP: bool = True
+    DB_REQUIRED_ON_STARTUP: bool = True
     
     # CORS Settings
     ALLOWED_ORIGINS: str = "*"

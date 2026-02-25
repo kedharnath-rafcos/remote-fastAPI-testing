@@ -17,8 +17,16 @@ async def lifespan(app: FastAPI):
     # Startup
     print(f"🚀 Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     print(f"🌍 Environment: {settings.ENVIRONMENT}")
-    print(f"📊 Initializing database...")
-    await init_db()
+    if settings.DB_INIT_ON_STARTUP:
+        print(f"📊 Initializing database...")
+        try:
+            await init_db()
+        except Exception as exc:
+            if settings.DB_REQUIRED_ON_STARTUP:
+                raise
+            print(f"⚠️ Database initialization skipped: {exc}")
+    else:
+        print("⏭️ Database initialization disabled on startup")
     print(f"✅ Application ready!")
     
     yield

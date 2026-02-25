@@ -688,6 +688,8 @@ Complete list of all environment variables:
 | `DATABASE_ECHO` | boolean | No | True | Log SQL queries to console |
 | `DATABASE_POOL_SIZE` | integer | No | 5 | Connection pool size |
 | `DATABASE_MAX_OVERFLOW` | integer | No | 10 | Max overflow connections |
+| `DB_INIT_ON_STARTUP` | boolean | No | True | Run DB init and table creation on startup |
+| `DB_REQUIRED_ON_STARTUP` | boolean | No | True | Fail app startup if DB init fails |
 | `ALLOWED_ORIGINS` | string | **Yes** | Empty | Comma-separated CORS origins |
 | `SECRET_KEY` | string | **Yes** | None | Secret key for security |
 
@@ -704,6 +706,19 @@ docker build -t remote-fastapi-testing:latest .
 ```bash
 docker run --env-file .env -p 8000:8000 remote-fastapi-testing:latest
 ```
+
+### Render deployment fix for `Network is unreachable`
+
+This error usually means your `DATABASE_URL` points to `localhost` (or another private host not reachable from Render).
+
+Set these environment variables in Render:
+
+- `DATABASE_URL=postgresql+asyncpg://<user>:<password>@<render-db-host>:5432/<db_name>`
+- `ENVIRONMENT=production`
+- `DB_INIT_ON_STARTUP=True`
+- `DB_REQUIRED_ON_STARTUP=False` (optional, prevents crash-loop if DB is temporarily unavailable)
+
+If you use a Render-managed PostgreSQL instance, copy the **Internal Database URL** from Render and convert it to async format (`postgresql://` → `postgresql+asyncpg://`).
 
 ### Push image to GHCR automatically
 

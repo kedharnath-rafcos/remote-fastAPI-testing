@@ -2,7 +2,7 @@
 Async database configuration and session management using SQLAlchemy 2.0.
 Provides async SQLAlchemy engine, session, and base model.
 """
-import ssl
+import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
@@ -16,20 +16,22 @@ class Base(DeclarativeBase):
     pass
 
 
-# Convert postgresql:// to postgresql+asyncpg://
-DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
-ssl_context = ssl.create_default_context()
+DATABASE_URL = os.getenv("DATABASE_URL") or settings.DATABASE_URL
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set. Configure it in environment variables or .env")
+
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 # Create async SQLAlchemy engine
 engine = create_async_engine(
     DATABASE_URL,
-    connect_args={"ssl": ssl_context},
     echo=settings.DATABASE_ECHO,
     pool_size=settings.DATABASE_POOL_SIZE,
     max_overflow=settings.DATABASE_MAX_OVERFLOW,
     pool_pre_ping=settings.DATABASE_POOL_PRE_PING,
     pool_recycle=settings.DATABASE_POOL_RECYCLE,
-    future=True,
 )
 
 # Create async session factory

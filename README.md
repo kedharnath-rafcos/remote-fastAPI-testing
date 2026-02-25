@@ -22,6 +22,54 @@ A modern, async REST API built with FastAPI and PostgreSQL for managing educatio
 
 ## 🛠️ Setup Instructions
 
+## 🚀 Render Deployment (Production)
+
+Use these settings on Render for reliable production deployment:
+
+- **Environment**: `Docker`
+- **Dockerfile Path**: `./Dockerfile`
+- **Health Check Path**: `/health`
+- **Auto-Deploy**: Enabled
+
+Set these **Environment Variables** in Render service settings:
+
+```env
+ENVIRONMENT=production
+DEBUG=False
+APP_NAME=EduSportsConnect API
+APP_VERSION=1.0.0
+
+# Use Render PostgreSQL "External Database URL" or internal URL
+# Both can be postgresql://...; app auto-converts to asyncpg driver
+DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
+
+DATABASE_ECHO=False
+DATABASE_POOL_SIZE=20
+DATABASE_MAX_OVERFLOW=40
+DATABASE_POOL_PRE_PING=True
+DATABASE_POOL_RECYCLE=3600
+
+# Avoid create_all in production runtime; run migrations separately
+DB_INIT_ON_STARTUP=False
+DB_REQUIRED_ON_STARTUP=True
+
+ALLOWED_ORIGINS=https://your-frontend-domain.com,https://your-api-service.onrender.com
+SECRET_KEY=replace-with-64-char-random-hex
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=eu-north-1
+AWS_S3_BUCKET_NAME=sports-images-prod
+AWS_S3_MAX_FILE_SIZE=10485760
+AWS_S3_ALLOWED_EXTENSIONS=jpg,jpeg,png,gif,webp
+```
+
+Notes:
+- Render provides `PORT`; Docker CMD already uses it.
+- Keep secrets only in Render env vars (not in git-tracked files).
+- If using Supabase/managed PG, keep SSL enabled via URL query (`sslmode=require`).
+
 ### 1. Clone the Repository
 
 ```bash
@@ -61,17 +109,36 @@ This ensures everyone on your team has identical dependencies.
 
 ### 4. Configure Environment Variables
 
-**Copy the example file and customize it:**
+This project uses separate env files by environment:
+- `.env.development`
+- `.env.staging`
+- `.env.production`
+
+**Create each file from the corresponding template:**
 
 ```bash
 # Windows PowerShell
-Copy-Item .env.example .env
+Copy-Item .env.development.example .env.development
+Copy-Item .env.staging.example .env.staging
+Copy-Item .env.production.example .env.production
 
 # Linux/macOS
-cp .env.example .env
+cp .env.development.example .env.development
+cp .env.staging.example .env.staging
+cp .env.production.example .env.production
 ```
 
-**Edit `.env` file with your settings:**
+**Set active environment before running the app:**
+
+```bash
+# Windows PowerShell
+$env:ENVIRONMENT="development"   # or staging / production
+
+# Linux/macOS
+export ENVIRONMENT=development    # or staging / production
+```
+
+**Edit the selected env file with your settings (example):**
 
 ```env
 # Application Configuration
@@ -103,7 +170,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
   - `$` becomes `%24`
   - `&` becomes `%26`
   - Example: Password `Admin@123` → `Admin%40123`
-- **Never commit `.env`** to version control (it's in `.gitignore`)
+- **Never commit real env files** to version control (they are in `.gitignore`)
 - **Each team member** has their own `.env` with their local database credentials
 - **Use `.env.example`** as a template (this IS committed to git)
 

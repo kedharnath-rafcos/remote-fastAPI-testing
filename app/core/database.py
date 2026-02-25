@@ -27,6 +27,7 @@ if DATABASE_URL.startswith("postgresql://"):
 # Create async SQLAlchemy engine
 engine = create_async_engine(
     DATABASE_URL,
+    connect_args={"statement_cache_size": 0},
     echo=settings.DATABASE_ECHO,
     pool_size=settings.DATABASE_POOL_SIZE,
     max_overflow=settings.DATABASE_MAX_OVERFLOW,
